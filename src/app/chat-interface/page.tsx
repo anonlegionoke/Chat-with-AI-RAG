@@ -7,8 +7,8 @@ type ChatMode = 'quick' | 'memory' | 'contextual'
 
 export function ChatInterface() {
     const [chatMode, setChatMode] = useState<ChatMode>('quick')
-    const { messages, input, handleInputChange, handleSubmit } = useChat({
-        api: 'api/context',
+    const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+        api: `api/${chatMode}`,
         onError: (e) => {
             console.log(e)
         }
@@ -20,7 +20,7 @@ export function ChatInterface() {
         if (domNode) {
             domNode.scrollTop = domNode.scrollHeight
         }
-    })
+    }, [messages])
 
     const getPlaceholder = () => {
         switch (chatMode) {
@@ -35,15 +35,61 @@ export function ChatInterface() {
         }
     }
 
-    return (
-        <main className="flex flex-col w-full h-screen max-h-dvh bg-background">
+    const getLoadingColor = () => {
+        switch (chatMode) {
+            case 'quick':
+                return 'bg-red-400'
+            case 'memory':
+                return 'bg-green-500'
+            case 'contextual':
+                return 'bg-blue-500'
+            default:
+                return 'bg-blue-500'
+        }
+    }
 
-            <header className="p-4 w-full max-w-5xl mx-auto">
+    return (
+        <main className="flex flex-col w-full h-screen max-h-dvh px-4 sm:px-6 bg-gray-100">
+
+            <header className="p-4 w-full max-w-5xl mx-auto mt-2">
                 <h1 className="text-4xl font-bold">Chat with AI</h1>
                 <p className="text-muted-foreground text-xs">Powered by LangChain</p>
             </header>
 
-            <section className="p-4 flex flex-col flex-grow justify-center">
+            <section className="container flex flex-col flex-grow gap-4 mx-auto max-w-5xl border-2 mt-10 rounded-xl">
+                <ul ref={chatParent} className="h-1 p-4 flex-grow bg-muted/50 rounded-lg overflow-y-auto flex flex-col gap-4">
+                    {messages.map((m, index) => (
+                        <div key={index}>
+                            {m.role === 'user' ? (
+                                <li key={m.id} className="flex flex-row">
+                                    <div className="rounded-xl p-4 bg-background shadow-md flex max-w-[85%]">
+                                        <p className="text-primary whitespace-pre-wrap">{m.content}</p>
+                                    </div>
+                                </li>
+                            ) : (
+                                <li key={m.id} className="flex flex-row-reverse">
+                                    <div className="rounded-xl p-4 bg-background shadow-md flex max-w-[85%]">
+                                        <p className="text-primary whitespace-pre-wrap">{m.content}</p>
+                                    </div>
+                                </li>
+                            )}
+                        </div>
+                    ))}
+                    {isLoading && (
+                        <li className="flex flex-row-reverse">
+                            <div className="rounded-xl p-4 bg-background shadow-md flex">
+                                <div className="flex space-x-3">
+                                    <div className={`w-3 h-3 ${getLoadingColor()} rounded-full animate-bounce [animation-delay:-0.3s]`}></div>
+                                    <div className={`w-3 h-3 ${getLoadingColor()} rounded-full animate-bounce [animation-delay:-0.15s]`}></div>
+                                    <div className={`w-3 h-3 ${getLoadingColor()} rounded-full animate-bounce`}></div>
+                                </div>
+                            </div>
+                        </li>
+                    )}
+                </ul>
+            </section>
+
+            <section className="flex flex-col pt-10 pb-20 justify-center">
                 <div id="buttons" className="flex w-full max-w-5xl mx-auto items-center pb-4 space-x-4">
                     <button 
                         onClick={() => setChatMode('quick')}
@@ -73,34 +119,17 @@ export function ChatInterface() {
                         placeholder={getPlaceholder()} 
                         type="text" 
                         value={input} 
-                        onChange={handleInputChange} 
+                        onChange={handleInputChange}
+                        disabled={isLoading}
                     />
-                    <button className="ml-2 bg-black text-white rounded-xl px-5 py-4.5 hover:bg-gray-700 cursor-pointer" type="submit">
-                        Submit
+                    <button 
+                        className="ml-2 bg-black text-white rounded-xl px-5 py-4.5 hover:bg-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200" 
+                        type="submit"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Thinking...' : 'Submit'}
                     </button>
                 </form>
-            </section>
-
-            <section className="container px-0 pb-10 flex flex-col flex-grow gap-4 mx-auto max-w-3xl">
-                <ul ref={chatParent} className="h-1 p-4 flex-grow bg-muted/50 rounded-lg overflow-y-auto flex flex-col gap-4">
-                    {messages.map((m, index) => (
-                        <div key={index}>
-                            {m.role === 'user' ? (
-                                <li key={m.id} className="flex flex-row">
-                                    <div className="rounded-xl p-4 bg-background shadow-md flex">
-                                        <p className="text-primary">{m.content}</p>
-                                    </div>
-                                </li>
-                            ) : (
-                                <li key={m.id} className="flex flex-row-reverse">
-                                    <div className="rounded-xl p-4 bg-background shadow-md flex w-3/4">
-                                        <p className="text-primary">{m.content}</p>
-                                    </div>
-                                </li>
-                            )}
-                        </div>
-                    ))}
-                </ul >
             </section>
         </main>
     )
