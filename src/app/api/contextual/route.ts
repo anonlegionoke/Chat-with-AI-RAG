@@ -11,8 +11,7 @@ import { HttpResponseOutputParser } from 'langchain/output_parsers';
 import { RunnableSequence } from "@langchain/core/runnables";
 
 const loader = new JSONLoader(
-    "src/data/states.json",
-    ["/state", "/code", "/nickname", "/website", "/admission_date", "/admission_number", "/capital_city", "/capital_url", "/population", "/population_rank", "/constitution_url", "/twitter_url"],
+    "src/data/context.json"
 );
 
 export const dynamic = 'force-dynamic'

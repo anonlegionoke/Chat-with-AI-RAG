@@ -1,12 +1,15 @@
 'use client'
 
+import AttachmentIcon from "@/components/ui/AttachmentIcon"
 import { useChat } from "ai/react"
 import { useRef, useEffect, useState } from 'react'
+import AttachmentPopup from "./AttachmentPopup"
 
 type ChatMode = 'quick' | 'memory' | 'contextual'
 
 export function ChatInterface() {
-    const [chatMode, setChatMode] = useState<ChatMode>('quick')
+    const [isAttachmentPopupOpen, setIsAttachmentPopupOpen] = useState(false);
+    const [chatMode, setChatMode] = useState<ChatMode>('quick');
     const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
         api: `api/${chatMode}`,
         onError: (e) => {
@@ -114,14 +117,25 @@ export function ChatInterface() {
                     </button>
                 </div>
                 <form onSubmit={handleSubmit} className="flex w-full max-w-5xl mx-auto items-center">
-                    <input 
-                        className="flex-1 min-h-[60px] rounded-xl px-4 py-2 border-2 focus:border-3" 
-                        placeholder={getPlaceholder()} 
-                        type="text" 
-                        value={input} 
-                        onChange={handleInputChange}
-                        disabled={isLoading}
-                    />
+                    <div className="flex-1 relative">
+                        <input 
+                            className="w-full min-h-[60px] rounded-xl px-4 py-2 border-2 focus:border-3 pr-12" 
+                            placeholder={getPlaceholder()} 
+                            type="text" 
+                            value={input} 
+                            onChange={handleInputChange}
+                            disabled={isLoading}
+                        />
+                        {chatMode === 'contextual' && (
+                            <button 
+                                type="button"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
+                                onClick={() => {setIsAttachmentPopupOpen(true)}}
+                            >
+                                <AttachmentIcon />
+                            </button>
+                        )}
+                    </div>
                     <button 
                         className="ml-2 bg-black text-white rounded-xl px-5 py-4.5 hover:bg-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200" 
                         type="submit"
@@ -131,6 +145,7 @@ export function ChatInterface() {
                     </button>
                 </form>
             </section>
+            {isAttachmentPopupOpen && <AttachmentPopup setIsAttachmentPopupOpen={setIsAttachmentPopupOpen} />}
         </main>
     )
 }
