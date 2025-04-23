@@ -50,7 +50,7 @@ const AttachmentPopup = ({ setIsAttachmentPopupOpen }: { setIsAttachmentPopupOpe
             />
             
             {/* Popup Content */}
-            <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-xl shadow-2xl p-6">
+            <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full md:max-w-md lg:max-w-lg min-w-[350px] max-w-[90vw] bg-white rounded-xl shadow-2xl p-6">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">Upload File</h2>
                     <button 

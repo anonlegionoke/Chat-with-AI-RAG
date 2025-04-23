@@ -4,6 +4,7 @@ import AttachmentIcon from "@/components/ui/AttachmentIcon"
 import { useChat } from "ai/react"
 import { useRef, useEffect, useState } from 'react'
 import AttachmentPopup from "./AttachmentPopup"
+import ReactMarkdown from 'react-markdown'
 
 type ChatMode = 'quick' | 'memory' | 'contextual'
 
@@ -72,7 +73,9 @@ export function ChatInterface() {
                             ) : (
                                 <li key={m.id} className="flex flex-row-reverse">
                                     <div className="rounded-xl p-4 bg-background shadow-md flex max-w-[85%]">
-                                        <p className="text-primary whitespace-pre-wrap">{m.content}</p>
+                                        <div className="text-primary prose prose-sm max-w-none [&_a]:text-blue-600 [&_a]:underline [&_a]:hover:text-blue-800 [&_pre]:bg-gray-100 [&_pre]:p-2 [&_pre]:rounded-md [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:rounded">
+                                            <ReactMarkdown>{m.content}</ReactMarkdown>
+                                        </div>
                                     </div>
                                 </li>
                             )}
@@ -125,6 +128,7 @@ export function ChatInterface() {
                             value={input} 
                             onChange={handleInputChange}
                             disabled={isLoading}
+                            autoFocus
                         />
                         {chatMode === 'contextual' && (
                             <button 
