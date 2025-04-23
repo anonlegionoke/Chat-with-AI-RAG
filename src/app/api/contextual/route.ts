@@ -3,16 +3,15 @@ import {
     Message as VercelChatMessage,
 } from 'ai';
 import { PromptTemplate } from '@langchain/core/prompts';
-
 import { JSONLoader } from "langchain/document_loaders/fs/json";
+import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { formatDocumentsAsString } from 'langchain/util/document';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { HttpResponseOutputParser } from 'langchain/output_parsers';
 import { RunnableSequence } from "@langchain/core/runnables";
-
-const loader = new JSONLoader(
-    "src/data/context.json"
-);
+import { existsSync } from 'fs';
+import { join } from 'path';
+import { Document } from '@langchain/core/documents';
 
 export const dynamic = 'force-dynamic'
 
@@ -30,16 +29,34 @@ Current conversation: {chat_history}
 user: {message}
 assistant:`;
 
-
 export async function POST(req: Request) {
     try {
         const { messages } = await req.json();
-
         const formattedPreviousMessages = messages.slice(0, -1).map(formatMessage);
-
         const currentMessageContent = messages[messages.length - 1].content;
 
-        const docs = await loader.load();
+        // Check for both JSON and PDF files
+        const dataDir = join(process.cwd(), 'src', 'data');
+        const jsonPath = join(dataDir, 'context.json');
+        const pdfPath = join(dataDir, 'context.pdf');
+
+        let docs: Document[] = [];
+        
+        if (existsSync(jsonPath)) {
+            const jsonLoader = new JSONLoader(jsonPath);
+            const jsonDocs = await jsonLoader.load();
+            docs = [...docs, ...jsonDocs];
+        }
+
+        if (existsSync(pdfPath)) {
+            const pdfLoader = new PDFLoader(pdfPath);
+            const pdfDocs = await pdfLoader.load();
+            docs = [...docs, ...pdfDocs];
+        }
+
+        if (docs.length === 0) {
+            throw new Error('No context files found. Please upload a JSON or PDF file first.');
+        }
 
         const prompt = PromptTemplate.fromTemplate(TEMPLATE);
 
@@ -72,7 +89,7 @@ export async function POST(req: Request) {
         const stream = await chain.stream({
             chat_history: formattedPreviousMessages.join('\n'),
             message: currentMessageContent
-        })
+        });
 
         return new Response(stream.pipeThrough(createStreamDataTransformer()),
         {

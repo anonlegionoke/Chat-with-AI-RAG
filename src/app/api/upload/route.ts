@@ -15,6 +15,19 @@ export async function POST(request: Request) {
             )
         }
 
+        if (type === 'json' && !file.name.endsWith('.json')) {
+            return NextResponse.json(
+                { error: 'Invalid file type. Expected JSON file.' },
+                { status: 400 }
+            )
+        }
+        if (type === 'pdf' && !file.name.endsWith('.pdf')) {
+            return NextResponse.json(
+                { error: 'Invalid file type. Expected PDF file.' },
+                { status: 400 }
+            )
+        }
+
         // Convert file to buffer
         const bytes = await file.arrayBuffer()
         const buffer = Buffer.from(bytes)
@@ -22,16 +35,18 @@ export async function POST(request: Request) {
         // Get the data directory path
         const dataDir = join(process.cwd(), 'src', 'data')
         
-        // Delete existing context.json if it exists
-        try {
-            await unlink(join(dataDir, 'context.json'))
-        } catch (error) {
-            console.log('No existing context.json to delete')
+        const filesToDelete = ['context.json', 'context.pdf']
+        for (const fileName of filesToDelete) {
+            try {
+                await unlink(join(dataDir, fileName))
+            } catch (error) {
+                console.log(`No existing ${fileName} to delete`)
+            }
         }
 
         // Save the new file
-        const fileName = type === 'json' ? 'context.json' : file.name
-        const filePath = join(dataDir, fileName)
+        const newFileName = type === 'json' ? 'context.json' : 'context.pdf'
+        const filePath = join(dataDir, newFileName)
         await writeFile(filePath, buffer)
 
         return NextResponse.json(
