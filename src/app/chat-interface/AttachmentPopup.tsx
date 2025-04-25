@@ -5,6 +5,8 @@ import { useState } from 'react'
 
 const AttachmentPopup = ({ setIsAttachmentPopupOpen }: { setIsAttachmentPopupOpen: (open: boolean) => void }) => {
     const [isUploading, setIsUploading] = useState(false)
+    const [pdfHover, setPdfHover] = useState(false)
+    const [jsonHover, setJsonHover] = useState(false)
 
     const handleFileSelect = async (type: 'pdf' | 'json') => {
         const input = document.createElement('input')
@@ -50,12 +52,16 @@ const AttachmentPopup = ({ setIsAttachmentPopupOpen }: { setIsAttachmentPopupOpe
             />
             
             {/* Popup Content */}
-            <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full md:max-w-md lg:max-w-lg min-w-[350px] max-w-[90vw] bg-white rounded-xl shadow-2xl p-6">
+            <div
+                className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full md:max-w-md lg:max-w-lg min-w-[350px] max-w-[90vw] rounded-xl shadow-2xl p-6 transition-colors"
+                style={{ backgroundColor: 'var(--chat-bg)', color: 'var(--text-primary)' }}
+            >
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold">Upload File</h2>
+                    <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>Upload File</h2>
                     <button 
                         onClick={() => !isUploading && setIsAttachmentPopupOpen(false)}
-                        className="text-gray-500 hover:text-gray-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ color: 'var(--text-secondary)' }}
                         disabled={isUploading}
                     >
                         <CloseIcon />
@@ -64,21 +70,33 @@ const AttachmentPopup = ({ setIsAttachmentPopupOpen }: { setIsAttachmentPopupOpe
                 <div className="flex gap-14 p-8 justify-center">
                     <div 
                         onClick={() => !isUploading && handleFileSelect('pdf')}
-                        className={`border-3 border-red-400 rounded-lg p-10 text-center flex flex-col items-center gap-2 cursor-pointer bg-red-300 hover:bg-red-400 transition-colors ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`border-3 rounded-lg p-10 text-center flex flex-col items-center gap-2 cursor-pointer transition-colors ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        style={{
+                            backgroundColor: pdfHover ? 'var(--pdf-border, #f87171)' : 'var(--pdf-bg, #fee2e2)',
+                            borderColor: 'var(--pdf-border, #f87171)',
+                        }}
+                        onMouseEnter={() => setPdfHover(true)}
+                        onMouseLeave={() => setPdfHover(false)}
                     >
                         <PdfIcon />
-                        <span className="text-red-700 font-medium">PDF</span>
+                        <span className="font-medium" style={{ color: 'var(--pdf-text, #b91c1c)' }}>PDF</span>
                     </div>
                     <div 
                         onClick={() => !isUploading && handleFileSelect('json')}
-                        className={`border-3 border-yellow-300 rounded-lg p-10 text-center flex flex-col items-center gap-2 cursor-pointer bg-yellow-200 hover:bg-yellow-300 transition-colors ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`border-3 rounded-lg p-10 text-center flex flex-col items-center gap-2 cursor-pointer transition-colors ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        style={{
+                            backgroundColor: jsonHover ? 'var(--json-border, #fde047)' : 'var(--json-bg, #fef9c3)',
+                            borderColor: 'var(--json-border, #fde047)',
+                        }}
+                        onMouseEnter={() => setJsonHover(true)}
+                        onMouseLeave={() => setJsonHover(false)}
                     >
                         <JsonIcon />
-                        <span className="text-yellow-700 font-medium">JSON</span>
+                        <span className="font-medium" style={{ color: 'var(--json-text, #a16207)' }}>JSON</span>
                     </div>
                 </div>
                 {isUploading && (
-                    <div className="text-center text-gray-500">
+                    <div className="text-center" style={{ color: 'var(--text-secondary)' }}>
                         Uploading file...
                     </div>
                 )}

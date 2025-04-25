@@ -5,12 +5,14 @@ import { useChat } from "ai/react"
 import { useRef, useEffect, useState } from 'react'
 import AttachmentPopup from "./AttachmentPopup"
 import ReactMarkdown from 'react-markdown'
+import { Moon, Sun } from 'lucide-react'
 
 type ChatMode = 'quick' | 'memory' | 'contextual'
 
 export function ChatInterface() {
     const [isAttachmentPopupOpen, setIsAttachmentPopupOpen] = useState(false);
     const [chatMode, setChatMode] = useState<ChatMode>('quick');
+    const [isDarkMode, setIsDarkMode] = useState(false);
     const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
         api: `api/${chatMode}`,
         onError: (e) => {
@@ -25,6 +27,25 @@ export function ChatInterface() {
             domNode.scrollTop = domNode.scrollHeight
         }
     }, [messages])
+
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme')
+        if (savedTheme) {
+            setIsDarkMode(savedTheme === 'dark')
+            document.documentElement.setAttribute('data-theme', savedTheme)
+        } else {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+            setIsDarkMode(prefersDark)
+            document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light')
+        }
+    }, [])
+
+    const toggleDarkMode = () => {
+        const newDarkMode = !isDarkMode
+        setIsDarkMode(newDarkMode)
+        document.documentElement.setAttribute('data-theme', newDarkMode ? 'dark' : 'light')
+        localStorage.setItem('theme', newDarkMode ? 'dark' : 'light')
+    }
 
     const getPlaceholder = () => {
         switch (chatMode) {
@@ -53,28 +74,60 @@ export function ChatInterface() {
     }
 
     return (
-        <main className="flex flex-col w-full h-screen max-h-dvh px-4 sm:px-6 bg-gray-100">
+        <main className="flex flex-col w-full h-screen max-h-dvh px-4 sm:px-6" style={{ backgroundColor: 'var(--background)' }}>
 
-            <header className="p-4 w-full max-w-5xl mx-auto mt-2">
-                <h1 className="text-4xl font-bold">Chat with AI</h1>
-                <p className="text-muted-foreground text-xs">Powered by LangChain</p>
+            <header className="p-4 w-full max-w-5xl mx-auto mt-2 flex justify-between items-center">
+                <div>
+                    <h1 className="text-4xl font-bold" style={{ color: 'var(--text-primary)' }}>Chat with AI</h1>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Powered by LangChain</p>
+                </div>
+                <button
+                    onClick={toggleDarkMode}
+                    className="p-2 rounded-full transition-colors cursor-pointer"
+                    style={{ backgroundColor: 'var(--chat-bg)' }}
+                    aria-label="Toggle dark mode"
+                >
+                    {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" style={{ color: 'var(--text-secondary)' }} />}
+                </button>
             </header>
 
-            <section className="container flex flex-col flex-grow gap-4 mx-auto max-w-5xl border-2 mt-10 rounded-xl">
-                <ul ref={chatParent} className="h-1 p-4 flex-grow bg-muted/50 rounded-lg overflow-y-auto flex flex-col gap-4">
+            <section className="container flex flex-col flex-grow gap-4 mx-auto max-w-5xl mt-10 rounded-xl" style={{ border: '2px solid var(--border-color)' }}>
+                <ul ref={chatParent} className="h-1 p-4 flex-grow rounded-lg overflow-y-auto flex flex-col gap-4" style={{ backgroundColor: 'var(--chat-bg)' }}>
                     {messages.map((m, index) => (
                         <div key={index}>
                             {m.role === 'user' ? (
                                 <li key={m.id} className="flex flex-row">
-                                    <div className="rounded-xl p-4 bg-background shadow-md flex max-w-[85%]">
-                                        <p className="text-primary whitespace-pre-wrap">{m.content}</p>
+                                    <div className="rounded-xl p-4 shadow-md flex max-w-[85%]" style={{ backgroundColor: 'var(--message-bg)' }}>
+                                        <p className="whitespace-pre-wrap" style={{ color: 'var(--text-primary)' }}>{m.content}</p>
                                     </div>
                                 </li>
                             ) : (
                                 <li key={m.id} className="flex flex-row-reverse">
-                                    <div className="rounded-xl p-4 bg-background shadow-md flex max-w-[85%]">
-                                        <div className="text-primary prose prose-sm max-w-none [&_a]:text-blue-600 [&_a]:underline [&_a]:hover:text-blue-800 [&_pre]:bg-gray-100 [&_pre]:p-2 [&_pre]:rounded-md [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:rounded">
-                                            <ReactMarkdown>{m.content}</ReactMarkdown>
+                                    <div className="rounded-xl p-4 shadow-md flex max-w-[85%]" style={{ backgroundColor: 'var(--message-bg)' }}>
+                                        <div className="prose prose-sm max-w-none" style={{ color: 'var(--text-primary)' }}>
+                                            <ReactMarkdown
+                                                components={{
+                                                    pre: ({ node, ...props }) => (
+                                                        <div className="relative">
+                                                            <pre className="bg-gray-800 text-gray-100 p-4 rounded-lg overflow-x-auto" {...props as React.HTMLAttributes<HTMLPreElement>} />
+                                                        </div>
+                                                    ),
+                                                    code: ({ node, className, children, ...props }) => {
+                                                        const match = /language-(\w+)/.exec(className || '')
+                                                        return match ? (
+                                                            <pre className={className} {...props as React.HTMLAttributes<HTMLPreElement>}>
+                                                                {children}
+                                                            </pre>
+                                                        ) : (
+                                                            <code className="bg-gray-100 text-gray-800 px-1 py-0.5 rounded" {...props}>
+                                                                {children}
+                                                            </code>
+                                                        )
+                                                    }
+                                                }}
+                                            >
+                                                {m.content}
+                                            </ReactMarkdown>
                                         </div>
                                     </div>
                                 </li>
@@ -83,7 +136,7 @@ export function ChatInterface() {
                     ))}
                     {isLoading && (
                         <li className="flex flex-row-reverse">
-                            <div className="rounded-xl p-4 bg-background shadow-md flex">
+                            <div className="rounded-xl p-4 shadow-md flex" style={{ backgroundColor: 'var(--message-bg)' }}>
                                 <div className="flex space-x-3">
                                     <div className={`w-3 h-3 ${getLoadingColor()} rounded-full animate-bounce [animation-delay:-0.3s]`}></div>
                                     <div className={`w-3 h-3 ${getLoadingColor()} rounded-full animate-bounce [animation-delay:-0.15s]`}></div>
@@ -99,23 +152,38 @@ export function ChatInterface() {
                 <div id="buttons" className="flex w-full max-w-5xl mx-auto items-center pb-4 space-x-4">
                     <button 
                         onClick={() => setChatMode('quick')}
-                        className={`${chatMode === 'quick' ? 'bg-red-300 scale-x-105' : 'bg-red-200'} text-red-800 font-bold rounded-2xl px-4 py-2 hover:bg-red-300 cursor-pointer border-2 border-red-300 flex items-center gap-2 transition-all duration-300 ease-in-out`}
+                        className={`${chatMode === 'quick' ? 'scale-x-105' : ''} font-bold rounded-2xl px-4 py-2 cursor-pointer border-2 flex items-center gap-2 transition-all duration-300 ease-in-out`}
+                        style={{ 
+                            backgroundColor: chatMode === 'quick' ? 'var(--quick-button-active)' : 'var(--quick-button-bg)',
+                            color: 'var(--quick-button-text)',
+                            borderColor: chatMode === 'quick' ? 'var(--quick-button-active)' : 'var(--quick-button-border)'
+                        }}
                     >
-                        {chatMode === 'quick' && <span className="text-red-800 font-bold">✓</span>}
+                        {chatMode === 'quick' && <span className="font-bold" style={{ color: 'var(--quick-button-text)' }}>✓</span>}
                         Quick Chat
                     </button>
                     <button 
                         onClick={() => setChatMode('memory')}
-                        className={`${chatMode === 'memory' ? 'bg-green-300 scale-x-105' : 'bg-green-200'} text-green-900 font-bold rounded-2xl px-4 py-2 hover:bg-green-300 cursor-pointer border-2 border-green-300 flex items-center gap-2 transition-all duration-300 ease-in-out`}
+                        className={`${chatMode === 'memory' ? 'scale-x-105' : ''} font-bold rounded-2xl px-4 py-2 cursor-pointer border-2 flex items-center gap-2 transition-all duration-300 ease-in-out`}
+                        style={{ 
+                            backgroundColor: chatMode === 'memory' ? 'var(--memory-button-active)' : 'var(--memory-button-bg)',
+                            color: 'var(--memory-button-text)',
+                            borderColor: chatMode === 'memory' ? 'var(--memory-button-active)' : 'var(--memory-button-border)'
+                        }}
                     >
-                        {chatMode === 'memory' && <span className="text-green-900 font-bold">✓</span>}
+                        {chatMode === 'memory' && <span className="font-bold" style={{ color: 'var(--memory-button-text)' }}>✓</span>}
                         Chat with Memory
                     </button>
                     <button 
                         onClick={() => setChatMode('contextual')}
-                        className={`${chatMode === 'contextual' ? 'bg-blue-300 scale-x-105' : 'bg-blue-200'} text-blue-900 font-bold rounded-2xl px-4 py-2 hover:bg-blue-300 cursor-pointer border-2 border-blue-300 flex items-center gap-2 transition-all duration-300 ease-in-out`}
+                        className={`${chatMode === 'contextual' ? 'scale-x-105' : ''} font-bold rounded-2xl px-4 py-2 cursor-pointer border-2 flex items-center gap-2 transition-all duration-300 ease-in-out`}
+                        style={{ 
+                            backgroundColor: chatMode === 'contextual' ? 'var(--contextual-button-active)' : 'var(--contextual-button-bg)',
+                            color: 'var(--contextual-button-text)',
+                            borderColor: chatMode === 'contextual' ? 'var(--contextual-button-active)' : 'var(--contextual-button-border)'
+                        }}
                     >
-                        {chatMode === 'contextual' && <span className="text-blue-900 font-bold">✓</span>}
+                        {chatMode === 'contextual' && <span className="font-bold" style={{ color: 'var(--contextual-button-text)' }}>✓</span>}
                         Contextual Chat
                     </button>
                 </div>
@@ -123,6 +191,11 @@ export function ChatInterface() {
                     <div className="flex-1 relative">
                         <input 
                             className="w-full min-h-[60px] rounded-xl px-4 py-2 border-2 focus:border-3 pr-12" 
+                            style={{ 
+                                backgroundColor: 'var(--message-bg)',
+                                color: 'var(--text-primary)',
+                                borderColor: 'var(--border-color)'
+                            }}
                             placeholder={getPlaceholder()} 
                             type="text" 
                             value={input} 
@@ -133,7 +206,8 @@ export function ChatInterface() {
                         {chatMode === 'contextual' && (
                             <button 
                                 type="button"
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+                                style={{ color: 'var(--text-secondary)' }}
                                 onClick={() => {setIsAttachmentPopupOpen(true)}}
                             >
                                 <AttachmentIcon />
@@ -141,7 +215,11 @@ export function ChatInterface() {
                         )}
                     </div>
                     <button 
-                        className="ml-2 bg-black text-white rounded-xl px-5 py-4.5 hover:bg-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200" 
+                        className="ml-2 rounded-xl px-5 py-4.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200" 
+                        style={{ 
+                            backgroundColor: 'var(--text-primary)',
+                            color: 'var(--background)'
+                        }}
                         type="submit"
                         disabled={isLoading}
                     >
