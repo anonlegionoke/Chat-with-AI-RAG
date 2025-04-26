@@ -3,6 +3,23 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --chat-bg: #f3f4f6;
+  --message-bg: #ffffff;
+  --text-primary: #171717;
+  --text-secondary: #4b5563;
+  --border-color: #e5e7eb;
+  --quick-button-bg: #fecaca;
+  --quick-button-active: #fca5a5;
+  --quick-button-text: #991b1b;
+  --quick-button-border: #fca5a5;
+  --memory-button-bg: #bbf7d0;
+  --memory-button-active: #86efac;
+  --memory-button-text: #166534;
+  --memory-button-border: #86efac;
+  --contextual-button-bg: #bfdbfe;
+  --contextual-button-active: #93c5fd;
+  --contextual-button-text: #1e40af;
+  --contextual-button-border: #93c5fd;
 }
 
 @theme inline {
@@ -12,11 +29,26 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground: #0a0a0a;
-    --background: #ededed;
-  }
+[data-theme="dark"] {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --chat-bg: #1f2937;
+  --message-bg: #111827;
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --border-color: #374151;
+  --quick-button-bg: #7f1d1d;
+  --quick-button-active: #991b1b;
+  --quick-button-text: #fecaca;
+  --quick-button-border: #991b1b;
+  --memory-button-bg: #14532d;
+  --memory-button-active: #166534;
+  --memory-button-text: #bbf7d0;
+  --memory-button-border: #166534;
+  --contextual-button-bg: #1e40af;
+  --contextual-button-active: #1e3a8a;
+  --contextual-button-text: #bfdbfe;
+  --contextual-button-border: #1e3a8a;
 }
 
 body {
