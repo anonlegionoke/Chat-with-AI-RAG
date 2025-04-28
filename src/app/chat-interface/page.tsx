@@ -78,8 +78,8 @@ export function ChatInterface() {
 
             <header className="p-4 w-full max-w-5xl mx-auto mt-2 flex justify-between items-center">
                 <div>
-                    <h1 className="text-4xl font-bold" style={{ color: 'var(--text-primary)' }}>Chat with AI</h1>
-                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Powered by LangChain</p>
+                    <h1 className="text-4xl font-bold" style={{ color: 'var(--text-primary)' }}><img src="/ai-rag-chatapp-icon-minimal.png" alt="Chat with AI" className="inline-block w-14 h-14 -ml-2" style={{ filter: isDarkMode ? 'invert(1)' : 'none' }} /> Chat with AI</h1>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Powered by LangChain <img src="/langchain.svg" alt="LangChain" className="inline-block w-6 h-6" style={{ filter: isDarkMode ? 'invert(1)' : 'none' }} /></p>
                 </div>
                 <button
                     onClick={toggleDarkMode}
