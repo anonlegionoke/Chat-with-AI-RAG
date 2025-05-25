@@ -126,7 +126,7 @@ export default function ChatInterface() {
                                                     }
                                                 }}
                                             >
-                                                {m.content}
+                                                {m.content || 'Please try again with a different prompt.'}
                                             </ReactMarkdown>
                                         </div>
                                     </div>
