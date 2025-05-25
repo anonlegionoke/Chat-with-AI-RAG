@@ -3,13 +3,13 @@
 import AttachmentIcon from "@/components/ui/AttachmentIcon"
 import { useChat } from "ai/react"
 import { useRef, useEffect, useState } from 'react'
-import AttachmentPopup from "./AttachmentPopup"
+import AttachmentPopup from "../../components/AttachmentPopup"
 import ReactMarkdown from 'react-markdown'
 import { Moon, Sun } from 'lucide-react'
 
 type ChatMode = 'quick' | 'memory' | 'contextual'
 
-export function ChatInterface() {
+export default function ChatInterface() {
     const [isAttachmentPopupOpen, setIsAttachmentPopupOpen] = useState(false);
     const [chatMode, setChatMode] = useState<ChatMode>('quick');
     const [isDarkMode, setIsDarkMode] = useState(false);
