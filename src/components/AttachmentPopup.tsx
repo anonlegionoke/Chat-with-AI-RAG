@@ -1,3 +1,5 @@
+'use client'
+
 import CloseIcon from "@/components/ui/CloseIcon"
 import JsonIcon from "@/components/ui/JsonIcon"
 import PdfIcon from "@/components/ui/PdfIcon"
