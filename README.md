@@ -69,7 +69,7 @@ A modern, interactive chat application built with Next.js that demonstrates vari
 Select the "Quick Chat" mode for simple question-answer interactions without context memory. This mode is ideal for straightforward queries.
 
 ### Memory Chat
-Select the "Chat with Memory" mode for conversations where the AI remembers previous exchanges within the same session. This mode is great for multi-turn conversations.
+Select the "Memory Chat" mode for conversations where the AI remembers previous exchanges within the same session. This mode is great for multi-turn conversations.
 
 ### Contextual Chat (RAG)
 Select the "Contextual Chat" mode to upload documents that provide context for your questions:

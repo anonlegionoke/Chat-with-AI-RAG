@@ -172,7 +172,7 @@ export default function ChatInterface() {
                         }}
                     >
                         {chatMode === 'memory' && <span className="font-bold" style={{ color: 'var(--memory-button-text)' }}>✓</span>}
-                        Chat with Memory
+                        Memory Chat
                     </button>
                     <button 
                         onClick={() => setChatMode('contextual')}
