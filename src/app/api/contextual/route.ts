@@ -41,7 +41,7 @@ export async function POST(req: Request) {
         const pdfPath = join(dataDir, 'context.pdf');
 
         let docs: Document[] = [];
-        
+
         if (existsSync(jsonPath)) {
             const jsonLoader = new JSONLoader(jsonPath);
             const jsonDocs = await jsonLoader.load();
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
         const context = formatDocumentsAsString(docs);
 
         const model = new ChatGoogleGenerativeAI({
-            model: 'gemini-2.0-flash',
+            model: process.env.GEMINI_MODEL!,
             apiKey: process.env.GEMINI_API_KEY!,
             temperature: 0
         });
@@ -92,12 +92,12 @@ export async function POST(req: Request) {
         });
 
         return new Response(stream.pipeThrough(createStreamDataTransformer()),
-        {
-            status: 200,
-            headers: {
-                'Content-Type': 'text/event-stream',
-            },
-        });
+            {
+                status: 200,
+                headers: {
+                    'Content-Type': 'text/event-stream',
+                },
+            });
     } catch (e: any) {
         return Response.json({ error: e.message }, { status: e.status ?? 500 });
     }

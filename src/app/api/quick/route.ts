@@ -14,7 +14,7 @@ export async function POST(req: Request) {
         const prompt = PromptTemplate.fromTemplate("{message}");
 
         const model = new ChatGoogleGenerativeAI({
-            model: 'gemini-2.0-flash',
+            model: process.env.GEMINI_MODEL!,
             apiKey: process.env.GEMINI_API_KEY!
         });
 
@@ -25,13 +25,13 @@ export async function POST(req: Request) {
         const stream = await chain.stream({ message });
 
         return new Response(stream.pipeThrough(createStreamDataTransformer()),
-        {
-            status: 200,
-            headers: {
-                'Content-Type': 'text/event-stream',
-            },
-        }
-    );
+            {
+                status: 200,
+                headers: {
+                    'Content-Type': 'text/event-stream',
+                },
+            }
+        );
     } catch (e: any) {
         return Response.json({ error: e.message }, { status: e.status ?? 500 });
     }
