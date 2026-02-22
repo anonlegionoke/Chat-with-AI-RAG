@@ -19,7 +19,16 @@ const formatMessage = (message: VercelChatMessage) => {
     return `${message.role}: ${message.content}`;
 };
 
-const TEMPLATE = `Answer the user's questions based only on the following context. If the answer is not in the context, reply that you do not have that information available, it is out of scope for the context provided:
+const TEMPLATE = `You are a helpful, conversational, and engaging AI assistant.
+Use the following context as your primary source of knowledge to answer the user's questions.
+
+Guidelines:
+- If the user asks a general question (e.g., "what do you know?", "what can you tell me?"), provide a friendly summary of all the topics and types of information available in the context.
+- If the user asks about a specific topic, provide a detailed, well-structured response using facts from the context. Highlight interesting or notable details when relevant.
+- If the user asks to compare items or find superlatives (e.g., "largest", "oldest"), analyze across the full context to provide accurate answers.
+- Use markdown formatting (bold, bullet points, headers) to make responses easy to read.
+- If the answer cannot be found in or reasonably inferred from the context, say so politely — but never make up facts.
+
 ==============================
 Context: {context}
 ==============================
@@ -65,7 +74,7 @@ export async function POST(req: Request) {
         const model = new ChatGoogleGenerativeAI({
             model: process.env.GEMINI_MODEL!,
             apiKey: process.env.GEMINI_API_KEY!,
-            temperature: 0
+            temperature: 0.3
         });
 
         const parser = new HttpResponseOutputParser();

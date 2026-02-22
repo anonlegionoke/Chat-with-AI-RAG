@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
         // Get the data directory path
         const dataDir = join(process.cwd(), 'src', 'data')
-        
+
         const filesToDelete = ['context.json', 'context.pdf']
         for (const fileName of filesToDelete) {
             try {
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
         await writeFile(filePath, buffer)
 
         return NextResponse.json(
-            { message: 'File uploaded successfully' },
+            { message: 'File uploaded successfully', fileName: file.name, fileType: type },
             { status: 200 }
         )
     } catch (error) {

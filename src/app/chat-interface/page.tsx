@@ -4,6 +4,8 @@ import AttachmentIcon from "@/components/ui/AttachmentIcon"
 import { useChat } from "ai/react"
 import { useRef, useEffect, useState } from 'react'
 import AttachmentPopup from "../../components/AttachmentPopup"
+import JsonIcon from "@/components/ui/JsonIcon"
+import PdfIcon from "@/components/ui/PdfIcon"
 import ReactMarkdown from 'react-markdown'
 import { Moon, Sun } from 'lucide-react'
 
@@ -13,6 +15,7 @@ export default function ChatInterface() {
     const [isAttachmentPopupOpen, setIsAttachmentPopupOpen] = useState(false);
     const [chatMode, setChatMode] = useState<ChatMode>('quick');
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [uploadedFile, setUploadedFile] = useState<{ fileName: string; fileType: 'pdf' | 'json' } | null>(null);
     const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
         api: `api/${chatMode}`,
         onError: (e) => {
@@ -150,10 +153,10 @@ export default function ChatInterface() {
 
             <section className="flex flex-col pt-10 pb-20 justify-center">
                 <div id="buttons" className="flex w-full max-w-5xl mx-auto items-center pb-4 space-x-4">
-                    <button 
+                    <button
                         onClick={() => setChatMode('quick')}
                         className={`${chatMode === 'quick' ? 'scale-x-105' : ''} font-bold rounded-2xl px-4 py-2 cursor-pointer border-2 flex items-center gap-2 transition-all duration-300 ease-in-out`}
-                        style={{ 
+                        style={{
                             backgroundColor: chatMode === 'quick' ? 'var(--quick-button-active)' : 'var(--quick-button-bg)',
                             color: 'var(--quick-button-text)',
                             borderColor: chatMode === 'quick' ? 'var(--quick-button-active)' : 'var(--quick-button-border)'
@@ -162,10 +165,10 @@ export default function ChatInterface() {
                         {chatMode === 'quick' && <span className="font-bold" style={{ color: 'var(--quick-button-text)' }}>✓</span>}
                         Quick Chat
                     </button>
-                    <button 
+                    <button
                         onClick={() => setChatMode('memory')}
                         className={`${chatMode === 'memory' ? 'scale-x-105' : ''} font-bold rounded-2xl px-4 py-2 cursor-pointer border-2 flex items-center gap-2 transition-all duration-300 ease-in-out`}
-                        style={{ 
+                        style={{
                             backgroundColor: chatMode === 'memory' ? 'var(--memory-button-active)' : 'var(--memory-button-bg)',
                             color: 'var(--memory-button-text)',
                             borderColor: chatMode === 'memory' ? 'var(--memory-button-active)' : 'var(--memory-button-border)'
@@ -174,10 +177,10 @@ export default function ChatInterface() {
                         {chatMode === 'memory' && <span className="font-bold" style={{ color: 'var(--memory-button-text)' }}>✓</span>}
                         Memory Chat
                     </button>
-                    <button 
+                    <button
                         onClick={() => setChatMode('contextual')}
                         className={`${chatMode === 'contextual' ? 'scale-x-105' : ''} font-bold rounded-2xl px-4 py-2 cursor-pointer border-2 flex items-center gap-2 transition-all duration-300 ease-in-out`}
-                        style={{ 
+                        style={{
                             backgroundColor: chatMode === 'contextual' ? 'var(--contextual-button-active)' : 'var(--contextual-button-bg)',
                             color: 'var(--contextual-button-text)',
                             borderColor: chatMode === 'contextual' ? 'var(--contextual-button-active)' : 'var(--contextual-button-border)'
@@ -187,36 +190,53 @@ export default function ChatInterface() {
                         Contextual Chat
                     </button>
                 </div>
+
+                {/* Uploaded file indicator */}
+                {chatMode === 'contextual' && uploadedFile && (
+                    <div className="flex w-full max-w-5xl mx-auto items-center pb-2">
+                        <div
+                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-all max-w-xs"
+                            style={{ backgroundColor: 'var(--message-bg)', border: '1px solid var(--border-color)' }}
+                        >
+                            <span className="flex-shrink-0 flex items-center" style={{ transform: 'scale(0.6)', transformOrigin: 'center' }}>
+                                {uploadedFile.fileType === 'pdf' ? <PdfIcon /> : <JsonIcon />}
+                            </span>
+                            <span className="font-medium truncate" style={{ color: 'var(--text-primary)' }}>{uploadedFile.fileName}</span>
+                            <span className="flex-shrink-0 text-xs px-1.5 py-0.5 rounded-full" style={{ backgroundColor: 'var(--contextual-button-active, #3b82f6)', color: 'white' }}>Active</span>
+                        </div>
+                    </div>
+                )}
+
                 <form onSubmit={handleSubmit} className="flex w-full max-w-5xl mx-auto items-center">
                     <div className="flex-1 relative">
-                        <input 
-                            className="w-full min-h-[60px] rounded-xl px-4 py-2 border-2 focus:border-3 pr-12" 
-                            style={{ 
+                        <input
+                            className="w-full min-h-[60px] rounded-xl px-4 py-2 border-2 focus:border-3 pr-12"
+                            style={{
                                 backgroundColor: 'var(--message-bg)',
                                 color: 'var(--text-primary)',
                                 borderColor: 'var(--border-color)'
                             }}
-                            placeholder={getPlaceholder()} 
-                            type="text" 
-                            value={input} 
+                            placeholder={getPlaceholder()}
+                            type="text"
+                            value={input}
                             onChange={handleInputChange}
                             disabled={isLoading}
                             autoFocus
                         />
                         {chatMode === 'contextual' && (
-                            <button 
+                            <button
                                 type="button"
                                 className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
                                 style={{ color: 'var(--text-secondary)' }}
-                                onClick={() => {setIsAttachmentPopupOpen(true)}}
+                                onClick={() => { setIsAttachmentPopupOpen(true) }}
                             >
                                 <AttachmentIcon />
                             </button>
                         )}
                     </div>
-                    <button 
-                        className="ml-2 rounded-xl px-5 py-4.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200" 
-                        style={{ 
+                    <button
+                        className="ml-2 rounded-xl px-5 py-4.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200"
+                        style={{
                             backgroundColor: 'var(--text-primary)',
                             color: 'var(--background)'
                         }}
@@ -227,7 +247,7 @@ export default function ChatInterface() {
                     </button>
                 </form>
             </section>
-            {isAttachmentPopupOpen && <AttachmentPopup setIsAttachmentPopupOpen={setIsAttachmentPopupOpen} />}
+            {isAttachmentPopupOpen && <AttachmentPopup setIsAttachmentPopupOpen={setIsAttachmentPopupOpen} onFileUploaded={(fileInfo) => setUploadedFile(fileInfo)} />}
         </main>
     )
 }
