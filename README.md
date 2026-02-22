@@ -54,6 +54,7 @@ A modern, interactive chat application built with Next.js that demonstrates vari
 3. Create a `.env.local` file in the root directory with your Google Gemini API key:
    ```
    GEMINI_API_KEY=your_gemini_api_key_here
+   GEMINI_MODEL=your_gemini_model_name_here
    ```
 
 4. Start the development server:
